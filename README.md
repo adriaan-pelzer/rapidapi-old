@@ -1,6 +1,9 @@
 rapidapi
 ========
 
+Store your stuff, rapidly. Rapidapidly.
+---------------------------------------
+
 A schema-less API, which lets storing &amp; retrieving your stuff get out of your way.
 
 rapidapi (pronounced *rah-pee-dah-pee*) is a simple key/value store behind an HTTP API, that supports a CREATE/READ model (no explicit UPDATE or DELETE), and segregates duplicate key values by timestamp.
