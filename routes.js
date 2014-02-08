@@ -3,7 +3,7 @@ var Redis = require ( 'redis' );
 var redis;
 var globalConf;
 
-var debug = true;
+var debug = false;
 
 var log = function ( message ) {
     if ( debug ) {
@@ -14,6 +14,16 @@ var log = function ( message ) {
 var init = function ( config ) {
     redis = Redis.createClient ( config.redis_port, config.redis_host );
     globalConf = config;
+};
+
+var sendJsonHeaders = function ( res ) {
+    res.set ( {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json',
+        'cache-control': 'max-age=0, no-cache, no-store, must-revalidate',
+        'expires': 0,
+        'pragma': 'no-cache'
+    } );
 };
 
 var handleGet = function ( key, query, res ) {
@@ -59,6 +69,7 @@ var handleGet = function ( key, query, res ) {
         var results = []
 
         if ( error ) {
+            sendJsonHeaders ( res );
             res.status ( 500 ).send ( error ).end ();
         } else {
             if ( response.length == 2 ) {
@@ -69,6 +80,7 @@ var handleGet = function ( key, query, res ) {
                 }
             }
 
+            sendJsonHeaders ( res );
             res.status ( 200 ).send ( results ).end ();
         }
     } );
@@ -86,8 +98,10 @@ var handlePost = function ( key, query, body, res ) {
 
         redis.zadd ( redisArgs, function ( error, response ) {
             if ( error ) {
+                sendJsonHeaders ( res );
                 res.status ( 500 ).send ( error ).end ();
             } else {
+                sendJsonHeaders ( res );
                 res.status ( 200 ).send ( response ).end ();
             }
         } );
@@ -97,6 +111,7 @@ var handlePost = function ( key, query, body, res ) {
 
     if ( _.isUndefined ( query.value ) ) {
         if ( _.isUndefined ( body ) || _.isEmpty ( body ) ) {
+            sendJsonHeaders ( res );
             res.status ( 400 ).send ( 'HTTP POST has to be accompanied by the "value" query parameter, or a body' ).end ();
         } else {
             saveValue ( key, body, res );
@@ -112,6 +127,7 @@ var handleDel = function ( key, query, res ) {
     log ( 'DELETE ' + key + ' ' + JSON.stringify ( query ) );
 
     if ( _.isUndefined ( query.timestamp_before ) ) {
+        sendJsonHeaders ( res );
         res.status ( 400 ).send ( 'HTTP DELETE has to be accompanied by the "timestamp_before" query parameter' ).end ();
     } else {
         redisArgs = [ key, '-inf', query.timestamp_before ];
@@ -121,8 +137,10 @@ var handleDel = function ( key, query, res ) {
 
         redis.zremrangebyscore ( redisArgs, function ( error, response ) {
             if ( error ) {
+                sendJsonHeaders ( res );
                 res.status ( 500 ).send ( error ).end ();
             } else {
+                sendJsonHeaders ( res );
                 res.status ( 200 ).send ( response ).end ();
             }
         } );
@@ -141,6 +159,7 @@ var route = function ( method, key, query, body, res ) {
             handleDel ( key, query, res );
             break;
         default:
+            sendJsonHeaders ( res );
             res.status ( 405 ).send ( 'HTTP method "' + method + '" not supported' ).end ();
     }
 };

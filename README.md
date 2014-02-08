@@ -22,15 +22,15 @@ And, just like that, you're ready to store your stuff!
 
 ###CREATE
 
-POST http://*host*:*port*/*key* ( value in the body of the POST )
+POST http://**host**:**port**/**key** ( raw **value** in the body of the POST )
 
 ####OR
 
-POST http://*host*:*port*/*key*?value=*value* ( value as a query parameter - *this isn't very cool, I know, but it works, and improves the usability a lot for simple values - ap* )
+POST http://**host**:**port**/**key**?value=**value** ( value as a query parameter - *this isn't very cool, I know, but it works, and improves the usability a lot for simple values - ap* )
 
 ###READ
 
-GET http://*host*:*port*/*key*?timestamp=*specific_timestamp*&before=*before_timestamp*&after=*after_timestamp*&count=*count*
+GET http://**host**:**port**/**key**?timestamp=**specific_timestamp**&before=**before_timestamp**&after=**after_timestamp**&count=**count**
 
 Without any parameters, GET will return the latest key value stored
 
@@ -42,6 +42,6 @@ Without any parameters, GET will return the latest key value stored
 
 ###EXPIRE
 
-DELETE http://host:port/key?before=*before_timestamp*
+DELETE http://host:port/key?before=**before_timestamp**
 
 - *before_timestamp* (mandatory): Delete all values stored before the specified time.
