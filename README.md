@@ -1,7 +1,7 @@
 rapidapi
 ========
 
-Store your stuff, rapidly. Rapidapidly.
+Store your stuff, rapidly ... Rapidapidly.
 ---------------------------------------
 
 A schema-less API, which lets storing &amp; retrieving your stuff get out of your way.
