@@ -16,7 +16,7 @@ First, install redis. Head to the [redis download page](http://redis.io/download
 
 Next, start rapidapi, like so:
 
-    ./rapidapi.js -h ip address or hostname -p port -H redis hostname -P redis port
+    ./rapidapi.js -h <hostname> -p <port> -H <redis hostname> -P <redis port>
 
 And, just like that, you're ready to store your stuff!
 
