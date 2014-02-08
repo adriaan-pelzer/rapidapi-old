@@ -10,21 +10,37 @@ rapidapi (pronounced *rah-pee-dah-pee*) is a simple key/value store behind an HT
 
 It does, however, support an EXPIRE function on each key, to delete old entries.
 
+INSTALL
+-------
+
+First, install redis. Head to the [redis download page](http://redis.io/download), and download and install the latest stable version.
+
+Next, start rapidapi, like so:
+
+    ./rapidapi.js -h *ip address or hostname to listen on* -p *port to listen on* -H *redis hostname* -P *redis port*
+
+And, just like that, you're ready to store your stuff!
+
 CREATE
 ------
 
 POST http://*host*:*port*/*key* ( value in the body of the POST )
 
+###OR
+
+POST http://*host*:*port*/*key*?value=*value* ( value as a query parameter - *this isn't very cool, I know, but it works, and improves the usability a lot for simple values - ap* )
+
 READ
 ----
 
-GET http://*host*:*port*/*key*?timestamp=*specific_timestamp*&before=*before_timestamp*&after=*after_timestamp*
+GET http://*host*:*port*/*key*?timestamp=*specific_timestamp*&before=*before_timestamp*&after=*after_timestamp*&count=*count*
 
-With any parameters, GET will return the latest key value stored
+Without any parameters, GET will return the latest key value stored
 
 - *specific_timestamp* (optional): Retrieve a historical key value stored at the specified time
 - *before_timestamp* (optional): Retrieve a list of stored key value URI's (with *specific_timestamp* specified), stored before the specified time. (Can be used in conjunction with *after_timestamp*)
 - *after_timestamp* (optional): Retrieve a list of stored key value URI's (with *specific_timestamp* specified), stored after the specified time.  (Can be used in conjunction with *before_timestamp*)
+- *count* (optional): Specify how many results to return. This parameter works with all the other parameters. Pagination is achieved by specifying *count*, and using the last, or first url timestamp (depending on your direction of travel) as the *before_timestamp* or *after_timestamp* of the next query, with the same *count* parameter.
 
 
 EXPIRE

@@ -1,0 +1,31 @@
+{
+  "name": "rapidapi",
+  "description": "A schema-less API, which lets storing & retrieving your stuff get out of your way.",
+  "author": "Adriaan Pelzer",
+  "dependencies": {
+    "express": "~3.4.8",
+    "redis": "~0.10.0",
+    "optimist": "~0.6.1",
+    "underscore": "~1.5.2"
+  },
+  "engine": "node v0.10.20",
+  "version": "0.0.1",
+  "main": "rapidapi.js",
+  "scripts": {
+    "test": "jasmine-node spec/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adriaan-pelzer/rapidapi"
+  },
+  "keywords": [
+    "api",
+    "key",
+    "value",
+    "store"
+  ],
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/adriaan-pelzer/rapidapi/issues"
+  }
+}
