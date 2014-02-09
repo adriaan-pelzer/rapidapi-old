@@ -101,6 +101,13 @@ GET http://**host**:**port**/**key**&before=**before_timestamp**&after=**after_t
 
 DELETE http://host:port/key?before=**before_timestamp**
 
+    {
+        success: true,
+        data: {
+            removed: 2
+        }
+    }
+
 ####Parameters
 
 - *before_timestamp* (mandatory): Delete all values stored before the specified time.
