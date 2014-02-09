@@ -16,6 +16,10 @@ var init = function ( config ) {
     globalConf = config;
 };
 
+var setRedis = function ( newRedis ) {
+    redis = newRedis;
+};
+
 var sendJsonHeaders = function ( res ) {
     res.set ( {
         'Access-Control-Allow-Origin': '*',
@@ -172,7 +176,7 @@ var handleDel = function ( key, query, res ) {
     log ( 'DELETE ' + key + ' ' + JSON.stringify ( query ) );
 
     if ( _.isUndefined ( query.timestamp_before ) ) {
-        sendResponse ( res, 400, null, 'HTTP DELETE has to be accompanied by the "timestamp_before" query parameter' );
+        sendResponse ( res, 400, 'HTTP DELETE has to be accompanied by the "timestamp_before" query parameter' );
     } else {
         redisArgs = [ key, '-inf', '(' + query.timestamp_before ];
 
@@ -207,4 +211,4 @@ var route = function ( method, key, query, body, res ) {
 
 exports.init = init;
 exports.route = route;
-exports.redis = redis;
+exports.setRedis = setRedis;
