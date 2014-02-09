@@ -28,11 +28,68 @@ POST http://**host**:**port**/**key** ( raw **value** in the body of the POST )
 
 POST http://**host**:**port**/**key**?value=**value** ( value as a query parameter - *this isn't very cool, I know, but it works, and improves the usability a lot for simple values - ap* )
 
+    {
+        success: true
+    }
+
 ###READ
 
-GET http://**host**:**port**/**key**?timestamp=**specific_timestamp**&before=**before_timestamp**&after=**after_timestamp**&count=**count**
+Get the latest stored value against a given key:
 
-Without any parameters, GET will return the latest key value stored
+GET http://**host**:**port**/**key**
+
+    {
+        success: true,
+        data: {
+            something: "I've saved earlier",
+            and: "maybe a little bit more"
+        },
+        timestamp: 1391905486948
+    }
+
+Get the stored value against a given key, stored at a given time:
+
+GET http://**host**:**port**/**key**?timestamp=**timestamp**
+
+    {
+        success: true,
+        data: {
+            something: "I've saved even earlier",
+            and: "maybe something else too"
+        },
+        timestamp: 1391905486535
+    }
+
+Get a list of URI's for values stored in a given time range:
+
+GET http://**host**:**port**/**key**&before=**before_timestamp**&after=**after_timestamp**
+
+    {
+        success: true,
+        data: [
+            "/myData?timestamp=1391905486948",
+            "/myData?timestamp=1391905486535",
+            "/myData?timestamp=1391905486381",
+            "/myData?timestamp=1391905485723",
+            "/myData?timestamp=1391878985495"
+        ]
+    }
+        
+Get a paginated list of URI's for values stored in a given time range, with a specified number of URI's per page:
+
+GET http://**host**:**port**/**key**&before=**before_timestamp**&after=**after_timestamp**&count=**count**
+
+    {
+        success: true,
+        data: [
+            "/myData?timestamp=1391905486381",
+            "/myData?timestamp=1391905485723"
+        ],
+        prev: "/myData?timestamp_before=1391905485723&count=2",
+        next: "/myData?timestamp_after=1391905486381&count=2"
+    }
+        
+####Parameters
 
 - *specific_timestamp* (optional): Retrieve a historical key value stored at the specified time
 - *before_timestamp* (optional): Retrieve a list of stored key value URI's (with *specific_timestamp* specified), stored before the specified time. (Can be used in conjunction with *after_timestamp*)
@@ -43,5 +100,7 @@ Without any parameters, GET will return the latest key value stored
 ###EXPIRE
 
 DELETE http://host:port/key?before=**before_timestamp**
+
+####Parameters
 
 - *before_timestamp* (mandatory): Delete all values stored before the specified time.

@@ -26,69 +26,117 @@ var sendJsonHeaders = function ( res ) {
     } );
 };
 
-var handleGet = function ( key, query, res ) {
-    var before = '+inf';
-    var after = '-inf';
-    var count = 1;
-    var redisArgs = [];
+var sendResponse = function ( res, status, error, response, prev, next, timestamp ) {
+    var resp;
 
-    log ( 'GET ' + key + ' ' + JSON.stringify ( query ) );
+    sendJsonHeaders ( res );
 
-    if ( ! _.isUndefined ( query.timestamp_before ) ) {
-        before = '(' + query.timestamp_before;
-        count = 0;
+    if ( error ) {
+        res.status ( status ).send ( { success: false, error: error } ).end ();
+    } else if ( _.isUndefined ( response ) ) {
+        resp = { success: ( status === 200 ) ? true : false };
+
+        res.status ( 200 ).send ( resp ).end ();
+    } else {
+        resp = { success: true, data: response };
+
+        if ( ! _.isUndefined ( prev ) ) {
+            resp.prev = prev;
+        }
+
+        if ( ! _.isUndefined ( next ) ) {
+            resp.next = next;
+        }
+
+        if ( ! _.isUndefined ( timestamp ) ) {
+            resp.timestamp = timestamp;
+        }
+
+        res.status ( 200 ).send ( resp ).end ();
     }
+};
 
-    if ( ! _.isUndefined ( query.timestamp_after ) ) {
-        after = '(' + query.timestamp_after;
-        count = 0;
-    }
-
-    if ( ! _.isUndefined ( query.timestamp ) ) {
-        before = query.timestamp;
-        after = query.timestamp;
-    }
-
-    if ( ! _.isUndefined ( query.count ) ) {
-        count = parseInt ( query.count, 10 );
-    }
-
-    redisArgs = [ key, before, after, 'WITHSCORES' ];
-
-    if ( count ) {
-        redisArgs.push ( 'LIMIT' );
-        redisArgs.push ( 0 );
-        redisArgs.push ( count );
-    }
-
-    log ( 'ZREVRANGEBYSCORE' );
-    log ( redisArgs );
-
-    redis.zrevrangebyscore ( redisArgs, function ( error, response ) {
-        var i;
-        var results = []
-
+var redisRevRangeByScore = function ( args, callBack ) {
+    redis.zrevrangebyscore ( args, function ( error, result ) {
         if ( error ) {
-            sendJsonHeaders ( res );
-            res.status ( 500 ).send ( error ).end ();
+            sendResponse ( res, 500, error );
         } else {
-            if ( response.length == 2 ) {
-                results.push ( response[0] );
-            } else {
-                for ( i = 0; i < response.length; i += 2 ) {
-                    results.push ( '/' + key + '?timestamp=' + response[i+1] );
-                }
-            }
-
-            sendJsonHeaders ( res );
-            res.status ( 200 ).send ( results ).end ();
+            callBack ( result );
         }
     } );
 };
 
+var getLatestValue = function ( key, res ) {
+    redisRevRangeByScore ( [ key, '+inf', '-inf', 'WITHSCORES', 'LIMIT', 0, 1 ], function ( result ) {
+        sendResponse ( res, 200, null, ( result.length > 0 ) ? result[0] : {}, undefined, undefined, ( result.length > 1 ) ? result[1] : undefined );
+    } );
+};
+
+var getSingleValue = function ( key, timestamp, res ) {
+    redisRevRangeByScore ( [ key, timestamp, timestamp, 'WITHSCORES', 'LIMIT', 0, 1 ], function ( result ) {
+        sendResponse ( res, 200, null, ( result.length > 0 ) ? result[0] : {}, undefined, undefined, ( result.length > 1 ) ? result[1] : undefined );
+    } );
+};
+
+var getMultiValue = function ( key, timestamp_before, timestamp_after, res ) {
+    redisRevRangeByScore ( [ key, timestamp_before, timestamp_after, 'WITHSCORES' ], function ( result ) {
+        var i, returnResult = [];
+
+        for ( i = 0; i < result.length; i += 2 ) {
+            returnResult.push ( '/' + key + '?timestamp=' + result[i+1] );
+        }
+
+        sendResponse ( res, 200, null, returnResult );
+    } );
+};
+
+var getPaginatedMultiValue = function ( key, timestamp_before, timestamp_after, count, res ) {
+    redisRevRangeByScore ( [ key, timestamp_before, timestamp_after, 'WITHSCORES', 'LIMIT', 0, count ], function ( result ) {
+        var i, returnResult = [];
+
+        for ( i = 0; i < result.length; i += 2 ) {
+            returnResult.push ( '/' + key + '?timestamp=' + result[i+1] );
+        }
+
+        sendResponse ( res, 200, null, returnResult, '/' + key + '?timestamp_before=' + result[i-1] + '&count=' + count, '/' + key + '?timestamp_after=' + result[1] + '&count=' + count );
+    } );
+};
+
+var handleGet = function ( key, query, res ) {
+    var before = '+inf';
+    var after = '-inf';
+
+    log ( 'GET ' + key + ' ' + JSON.stringify ( query ) );
+
+    if ( ! _.isUndefined ( query.timestamp ) ) {
+        getSingleValue ( key, query.timestamp, res );
+        return;
+    }
+
+    if ( ! _.isUndefined ( query.timestamp_before ) || ! _.isUndefined ( query.timestamp_after ) ) {
+        if ( ! _.isUndefined ( query.timestamp_before ) ) {
+            before = '(' + query.timestamp_before;
+        }
+
+        if ( ! _.isUndefined ( query.timestamp_after ) ) {
+            after = '(' + query.timestamp_after;
+        }
+
+        if ( _.isUndefined ( query.count ) ) {
+            getMultiValue ( key, before, after, res );
+            return;
+        } else {
+            getPaginatedMultiValue ( key, before, after, query.count, res );
+            return;
+        }
+    }
+
+    getLatestValue ( key, res );
+};
+
 var handlePost = function ( key, query, body, res ) {
     var redisArgs = [];
-    var value = '';
+    var value = _.isUndefined ( query.value ) ? body : query.value;
 
     var saveValue = function ( key, value, res ) {
         var redisArgs = [ key, new Date ().getTime (), value ];
@@ -98,26 +146,23 @@ var handlePost = function ( key, query, body, res ) {
 
         redis.zadd ( redisArgs, function ( error, response ) {
             if ( error ) {
-                sendJsonHeaders ( res );
-                res.status ( 500 ).send ( error ).end ();
+                sendResponse ( res, 500, error );
             } else {
-                sendJsonHeaders ( res );
-                res.status ( 200 ).send ( response ).end ();
+                if ( response !== 1 ) {
+                    sendResponse ( res, 500, 'Redis ZADD returned ' + response );
+                } else {
+                    sendResponse ( res, 200, null );
+                }
             }
         } );
     };
 
     log ( 'POST ' + key + ' ' + JSON.stringify ( query ) );
 
-    if ( _.isUndefined ( query.value ) ) {
-        if ( _.isUndefined ( body ) || _.isEmpty ( body ) ) {
-            sendJsonHeaders ( res );
-            res.status ( 400 ).send ( 'HTTP POST has to be accompanied by the "value" query parameter, or a body' ).end ();
-        } else {
-            saveValue ( key, body, res );
-        }
+    if ( _.isUndefined ( value ) || _.isEmpty ( value ) ) {
+        sendResponse ( res, 400, 'HTTP POST has to be accompanied by the "value" query parameter, or a body' );
     } else {
-        saveValue ( key, query.value, res );
+        saveValue ( key, value, res );
     }
 };
 
@@ -127,21 +172,18 @@ var handleDel = function ( key, query, res ) {
     log ( 'DELETE ' + key + ' ' + JSON.stringify ( query ) );
 
     if ( _.isUndefined ( query.timestamp_before ) ) {
-        sendJsonHeaders ( res );
-        res.status ( 400 ).send ( 'HTTP DELETE has to be accompanied by the "timestamp_before" query parameter' ).end ();
+        sendResponse ( res, 400, null, 'HTTP DELETE has to be accompanied by the "timestamp_before" query parameter' );
     } else {
-        redisArgs = [ key, '-inf', query.timestamp_before ];
+        redisArgs = [ key, '-inf', '(' + query.timestamp_before ];
 
         log ( 'ZREMRANGEBYSCORE' );
         log ( redisArgs );
 
         redis.zremrangebyscore ( redisArgs, function ( error, response ) {
             if ( error ) {
-                sendJsonHeaders ( res );
-                res.status ( 500 ).send ( error ).end ();
+                sendResponse ( res, 500, error );
             } else {
-                sendJsonHeaders ( res );
-                res.status ( 200 ).send ( response ).end ();
+                sendResponse ( res, 200, null, { removed: response } );
             }
         } );
     }
@@ -159,10 +201,10 @@ var route = function ( method, key, query, body, res ) {
             handleDel ( key, query, res );
             break;
         default:
-            sendJsonHeaders ( res );
-            res.status ( 405 ).send ( 'HTTP method "' + method + '" not supported' ).end ();
+            sendResponse ( res, 405, 'HTTP method "' + method + '" not supported' );
     }
 };
 
 exports.init = init;
 exports.route = route;
+exports.redis = redis;
