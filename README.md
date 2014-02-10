@@ -71,30 +71,51 @@ GET http://**host**:**port**/**key**?timestamp=**specific_timestamp**
         timestamp: 1391905486535
     }
 
-Get a list of URI's for values stored in a given time range:
+Get a list of values stored in a given time range:
 
 GET http://**host**:**port**/**key**&before=**before_timestamp**&after=**after_timestamp**
 
     {
         success: true,
         data: [
-            "/myData?timestamp=1391905486948",
-            "/myData?timestamp=1391905486535",
-            "/myData?timestamp=1391905486381",
-            "/myData?timestamp=1391905485723",
-            "/myData?timestamp=1391878985495"
+            {
+                data: 'lastValue',
+                timestamp: 1391905486948
+            },
+            {
+                data: 'secondLastValue',
+                timestamp: 1391905486535
+            },
+            {
+                data: 'thirdLastValue',
+                timestamp: 1391905486381
+            },
+            {
+                data: 'fourthLastValue',
+                timestamp: 1391905485723
+            },
+            {
+                data: 'fifthLastValue',
+                timestamp: 1391878985495
+            }
         ]
     }
         
-Get a paginated list of URI's for values stored in a given time range, with a specified number of URI's per page:
+Get a paginated list of values stored in a given time range, with a specified number of URI's per page:
 
 GET http://**host**:**port**/**key**&before=**before_timestamp**&after=**after_timestamp**&count=**count**
 
     {
         success: true,
         data: [
-            "/myData?timestamp=1391905486381",
-            "/myData?timestamp=1391905485723"
+            {
+                data: 'thirdLastValue',
+                timestamp: 1391905486381
+            },
+            {
+                data: 'fourthLastValue',
+                timestamp: 1391905485723
+            }
         ],
         prev: "/myData?timestamp_before=1391905485723&count=2",
         next: "/myData?timestamp_after=1391905486381&count=2"

@@ -87,7 +87,7 @@ var getMultiValue = function ( key, timestamp_before, timestamp_after, res ) {
         var i, returnResult = [];
 
         for ( i = 0; i < result.length; i += 2 ) {
-            returnResult.push ( '/' + key + '?timestamp=' + result[i+1] );
+            returnResult.push ( { data: result[i], timestamp: result[i+1] } );
         }
 
         sendResponse ( res, 200, null, returnResult );
@@ -96,13 +96,16 @@ var getMultiValue = function ( key, timestamp_before, timestamp_after, res ) {
 
 var getPaginatedMultiValue = function ( key, timestamp_before, timestamp_after, count, res ) {
     redisRevRangeByScore ( [ key, timestamp_before, timestamp_after, 'WITHSCORES', 'LIMIT', 0, count ], function ( result ) {
-        var i, returnResult = [];
+        var i, returnResult = [], next, prev;
 
         for ( i = 0; i < result.length; i += 2 ) {
-            returnResult.push ( '/' + key + '?timestamp=' + result[i+1] );
+            returnResult.push ( { data: result[i], timestamp: result[i+1] } );
         }
 
-        sendResponse ( res, 200, null, returnResult, '/' + key + '?before=' + result[i-1] + '&count=' + count, '/' + key + '?after=' + result[1] + '&count=' + count );
+        prev = '/' + key + '?before=' + result[i-1] + '&count=' + count;
+        next = '/  ' + key + '?after=' + result[1] + '&count=' + count;
+
+        sendResponse ( res, 200, null, returnResult, prev, next );
     } );
 };
 
