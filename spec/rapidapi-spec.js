@@ -1,13 +1,25 @@
 var routes = require ( '../routes.js' );
+var _ = require ( 'underscore' );
 
 describe ( 'rapidapi', function () {
     describe ( 'POST', function () {
-        var redisStub, resStub;
+        var redisStub, resStub, keysAdded;
 
         beforeEach ( function () {
+            keysAdded = {};
+
             redisStub = {
                 zadd: jasmine.createSpy ( 'zadd' ).andCallFake ( function ( args, callBack ) {
-                    callBack ( null, 1 );
+                    if ( _.isUndefined ( keysAdded[args[0]] ) ) {
+                        keysAdded[args[0]] = [];
+                    }
+
+                    if ( ! _.contains ( keysAdded[args[0]], args[2] ) ) {
+                        keysAdded[args[0]].push ( args[2] );
+                        callBack ( null, 1 );
+                    } else {
+                        callBack ( null, 0 );
+                    }
                 } )
             };
 
@@ -44,7 +56,7 @@ describe ( 'rapidapi', function () {
                 'pragma': 'no-cache'
             } );
             expect ( resStub.status ).toHaveBeenCalledWith ( 200 );
-            expect ( resStub.send ).toHaveBeenCalledWith ( { success: true } );
+            expect ( resStub.send ).toHaveBeenCalledWith ( { success : true, data : { added : 1 } } );
             expect ( resStub.end ).toHaveBeenCalled ();
         } );
 
@@ -60,7 +72,7 @@ describe ( 'rapidapi', function () {
                 'pragma': 'no-cache'
             } );
             expect ( resStub.status ).toHaveBeenCalledWith ( 200 );
-            expect ( resStub.send ).toHaveBeenCalledWith ( { success: true } );
+            expect ( resStub.send ).toHaveBeenCalledWith ( { success : true, data : { added : 1 } } );
             expect ( resStub.end ).toHaveBeenCalled ();
         } );
 
@@ -77,6 +89,21 @@ describe ( 'rapidapi', function () {
             } );
             expect ( resStub.status ).toHaveBeenCalledWith ( 400 );
             expect ( resStub.send ).toHaveBeenCalledWith ( { success : false, error : 'HTTP POST has to be accompanied by the "value" query parameter, or a body' } );
+            expect ( resStub.end ).toHaveBeenCalled ();
+        } );
+
+        it ( 'should not fail when the same value is stored twice', function () {
+            keysAdded = {};
+            routes.route ( 'post', 'testKey', { value: 'testValue' }, '', resStub );
+
+            expect ( resStub.status ).toHaveBeenCalledWith ( 200 );
+            expect ( resStub.send ).toHaveBeenCalledWith ( { success : true, data : { added : 1 } } );
+            expect ( resStub.end ).toHaveBeenCalled ();
+
+            routes.route ( 'post', 'testKey', { value: 'testValue' }, '', resStub );
+
+            expect ( resStub.status ).toHaveBeenCalledWith ( 200 );
+            expect ( resStub.send ).toHaveBeenCalledWith ( { success : true, data : { added : 0 } } );
             expect ( resStub.end ).toHaveBeenCalled ();
         } );
     } );

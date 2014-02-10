@@ -152,11 +152,7 @@ var handlePost = function ( key, query, body, res ) {
             if ( error ) {
                 sendResponse ( res, 500, error );
             } else {
-                if ( response !== 1 ) {
-                    sendResponse ( res, 500, 'Redis ZADD returned ' + response );
-                } else {
-                    sendResponse ( res, 200, null );
-                }
+                sendResponse ( res, 200, null, { added: response } );
             }
         } );
     };
