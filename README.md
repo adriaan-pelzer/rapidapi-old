@@ -12,13 +12,20 @@ It does, however, support an EXPIRE function on each key, to delete old entries.
 
 ###INSTALL
 
-First, install redis. Head to the [redis download page](http://redis.io/download), and download and install the latest stable version.
+- Install redis. Head to the [redis download page](http://redis.io/download), and download and install the latest stable version.
 
-Next, start rapidapi, like so:
+- Install node.js. Head to the [node.js download page](http://nodejs.org/download/), and download and install the latest stable version.
+
+- Install all rapidapi's dependencies, like so:
+    
+    cd wherever/you/installed/rapidapi
+    npm install
+
+- Start rapidapi, like so:
 
     ./rapidapi.js -h <hostname> -p <port> -H <redis hostname> -P <redis port>
 
-And, just like that, you're ready to store your stuff!
+Just like that, you're ready to store your stuff!
 
 ###CREATE
 
@@ -49,7 +56,7 @@ GET http://**host**:**port**/**key**
 
 Get the stored value against a given key, stored at a given time:
 
-GET http://**host**:**port**/**key**?timestamp=**timestamp**
+GET http://**host**:**port**/**key**?timestamp=**specific_timestamp**
 
     {
         success: true,

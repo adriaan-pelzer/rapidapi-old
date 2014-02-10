@@ -116,7 +116,7 @@ describe ( 'rapidapi', function () {
         } );
 
         it ( 'should delete values before the specified date', function () {
-            routes.route ( 'delete', 'testKey', { timestamp_before: 1391985295921 }, '', resStub );
+            routes.route ( 'delete', 'testKey', { before: 1391985295921 }, '', resStub );
 
             expect ( redisStub.zremrangebyscore ).toHaveBeenCalledWith ( [ 'testKey', '-inf', '(' + 1391985295921 ], jasmine.any ( Function ) );
             expect ( resStub.set ).toHaveBeenCalledWith ( {
@@ -131,7 +131,7 @@ describe ( 'rapidapi', function () {
             expect ( resStub.end ).toHaveBeenCalled ();
         } );
 
-        it ( 'should fail when no timestamp_before value is specified', function () {
+        it ( 'should fail when no "before" value is specified', function () {
             routes.route ( 'delete', 'testKey', {}, '', resStub );
 
             expect ( redisStub.zremrangebyscore ).not.toHaveBeenCalled ();
@@ -143,7 +143,7 @@ describe ( 'rapidapi', function () {
                 'pragma': 'no-cache'
             } );
             expect ( resStub.status ).toHaveBeenCalledWith ( 400 );
-            expect ( resStub.send ).toHaveBeenCalledWith ( { success : false, error : 'HTTP DELETE has to be accompanied by the "timestamp_before" query parameter' } );
+            expect ( resStub.send ).toHaveBeenCalledWith ( { success : false, error : 'HTTP DELETE has to be accompanied by the "before" query parameter' } );
             expect ( resStub.end ).toHaveBeenCalled ();
         } );
     } );

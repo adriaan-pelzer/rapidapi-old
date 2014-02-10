@@ -102,7 +102,7 @@ var getPaginatedMultiValue = function ( key, timestamp_before, timestamp_after, 
             returnResult.push ( '/' + key + '?timestamp=' + result[i+1] );
         }
 
-        sendResponse ( res, 200, null, returnResult, '/' + key + '?timestamp_before=' + result[i-1] + '&count=' + count, '/' + key + '?timestamp_after=' + result[1] + '&count=' + count );
+        sendResponse ( res, 200, null, returnResult, '/' + key + '?before=' + result[i-1] + '&count=' + count, '/' + key + '?after=' + result[1] + '&count=' + count );
     } );
 };
 
@@ -117,13 +117,13 @@ var handleGet = function ( key, query, res ) {
         return;
     }
 
-    if ( ! _.isUndefined ( query.timestamp_before ) || ! _.isUndefined ( query.timestamp_after ) ) {
-        if ( ! _.isUndefined ( query.timestamp_before ) ) {
-            before = '(' + query.timestamp_before;
+    if ( ! _.isUndefined ( query.before ) || ! _.isUndefined ( query.after ) ) {
+        if ( ! _.isUndefined ( query.before ) ) {
+            before = '(' + query.before;
         }
 
-        if ( ! _.isUndefined ( query.timestamp_after ) ) {
-            after = '(' + query.timestamp_after;
+        if ( ! _.isUndefined ( query.after ) ) {
+            after = '(' + query.after;
         }
 
         if ( _.isUndefined ( query.count ) ) {
@@ -175,10 +175,10 @@ var handleDel = function ( key, query, res ) {
 
     log ( 'DELETE ' + key + ' ' + JSON.stringify ( query ) );
 
-    if ( _.isUndefined ( query.timestamp_before ) ) {
-        sendResponse ( res, 400, 'HTTP DELETE has to be accompanied by the "timestamp_before" query parameter' );
+    if ( _.isUndefined ( query.before ) ) {
+        sendResponse ( res, 400, 'HTTP DELETE has to be accompanied by the "before" query parameter' );
     } else {
-        redisArgs = [ key, '-inf', '(' + query.timestamp_before ];
+        redisArgs = [ key, '-inf', '(' + query.before ];
 
         log ( 'ZREMRANGEBYSCORE' );
         log ( redisArgs );
