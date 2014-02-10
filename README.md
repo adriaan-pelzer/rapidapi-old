@@ -17,13 +17,17 @@ It does, however, support an EXPIRE function on each key, to delete old entries.
 - Install node.js. Head to the [node.js download page](http://nodejs.org/download/), and download and install the latest stable version.
 
 - Install all rapidapi's dependencies, like so:
-    
+
+```
     cd wherever/you/installed/rapidapi
     npm install
+```
 
 - Start rapidapi, like so:
 
+```
     ./rapidapi.js -h <hostname> -p <port> -H <redis hostname> -P <redis port>
+```
 
 Just like that, you're ready to store your stuff!
 
