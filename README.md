@@ -47,13 +47,15 @@ POST http://**host**:**port**/**key**?value=**value** ( value as a query paramet
 
 Get a list of stored keys, against a wildcard match string.
 
-GET http://**host**/**port**/search?keys=**keys_pattern**
+GET http://**host**:**port**/search?keys=**keys_pattern**
 
     {
         "success": true,
         "data": {
             "keys": [
-                "testKey"
+                "firstMatchingKey",
+                "secondMatchingKey",
+                "anotherMatchingKey"
             ]
         }
     }
@@ -65,6 +67,21 @@ GET http://**host**/**port**/search?keys=**keys_pattern**
 -- h*llo matches hllo and heeeello
 -- h[ae]llo matches hello and hallo, but not hillo
 -- use \ to escape special characters if you wnat to match them verbatim
+
+###COUNT
+
+Count the amount of values that have been stored gainst a specified key.
+
+GET http://**host**:**port**/**key**/count
+
+    {
+        "success": true,
+        "data": {
+            "keys": [
+                "testKey"
+            ]
+        }
+    }
 
 ###READ
 
