@@ -77,9 +77,7 @@ GET http://**host**:**port**/**key**/count
     {
         "success": true,
         "data": {
-            "keys": [
-                "testKey"
-            ]
+            "count": 4
         }
     }
 
