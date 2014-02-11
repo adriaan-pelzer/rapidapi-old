@@ -43,6 +43,29 @@ POST http://**host**:**port**/**key**?value=**value** ( value as a query paramet
         success: true
     }
 
+###SEARCH
+
+Get a list of stored keys, against a wildcard match string.
+
+GET http://**host**/**port**/search?keys=**keys_pattern**
+
+    {
+        "success": true,
+        "data": {
+            "keys": [
+                "testKey"
+            ]
+        }
+    }
+
+####Parameters
+
+- **keys_pattern**: Search will return a list of stored keys matching this pattern. Supported glob-style patterns are:
+-- h?llo matches hello, hallo and hxllo
+-- h*llo matches hllo and heeeello
+-- h[ae]llo matches hello and hallo, but not hillo
+-- use \ to escape special characters if you wnat to match them verbatim
+
 ###READ
 
 Get the latest stored value against a given key:

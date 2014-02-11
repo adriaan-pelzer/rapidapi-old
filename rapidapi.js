@@ -30,6 +30,12 @@ var argv = require ( 'optimist' )
 
 routes.init ( argv );
 
+app.get ( '/search', function ( req, res ) {
+    var query = req.query;
+
+    routes.route ( 'search', null, query, null, res );
+} );
+
 app.all ( '/:key', function ( req, res ) {
     var query = req.query;
     var key = req.params.key;

@@ -3,7 +3,7 @@ var Redis = require ( 'redis' );
 var redis;
 var globalConf;
 
-var debug = false;
+var debug = true;
 
 var log = function ( message ) {
     if ( debug ) {
@@ -192,6 +192,28 @@ var handleDel = function ( key, query, res ) {
     }
 };
 
+var handelSearch = function ( query, res ) {
+    var redisArgs = [];
+
+    if ( _.isUndefined ( query.keys ) ) {
+        sendResponse ( res, 400, 'Search has to be accompanied by the "keys" query parameter' );
+    } else {
+        redisArgs = [ query.keys ];
+
+        log ( 'SEARCH ' + query + ' ' + JSON.stringify ( query ) );
+        log ( 'KEYS' );
+        log ( redisArgs );
+
+        redis.keys ( redisArgs, function ( error, response ) {
+            if ( error ) {
+                sendResponse ( res, 500, error );
+            } else {
+                sendResponse ( res, 200, null, { keys: response } );
+            }
+        } );
+    }
+};
+
 var route = function ( method, key, query, body, res ) {
     switch ( method ) {
         case 'get':
@@ -202,6 +224,9 @@ var route = function ( method, key, query, body, res ) {
             break;
         case 'delete':
             handleDel ( key, query, res );
+            break;
+        case 'search':
+            handelSearch ( query, res );
             break;
         default:
             sendResponse ( res, 405, 'HTTP method "' + method + '" not supported' );
