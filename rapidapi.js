@@ -36,6 +36,13 @@ app.get ( '/search', function ( req, res ) {
     routes.route ( 'search', null, query, null, res );
 } );
 
+app.get ( '/:key/count', function ( req, res ) {
+    var query = req.query;
+    var key = req.params.key;
+
+    routes.route ( 'count', key, query, null, res );
+} );
+
 app.all ( '/:key', function ( req, res ) {
     var query = req.query;
     var key = req.params.key;

@@ -192,7 +192,7 @@ var handleDel = function ( key, query, res ) {
     }
 };
 
-var handelSearch = function ( query, res ) {
+var handleSearch = function ( query, res ) {
     var redisArgs = [];
 
     if ( _.isUndefined ( query.keys ) ) {
@@ -212,6 +212,18 @@ var handelSearch = function ( query, res ) {
             }
         } );
     }
+};
+
+var handleCount = function ( key, query, res ) {
+    var redisArgs = [ key ];
+
+    redis.zcard ( redisArgs, function ( error, response ) {
+        if ( error ) {
+            sendResponse ( res, 500, error );
+        } else {
+            sendResponse ( res, 200, null, { count: response } );
+        }
+    } );
 };
 
 var patchQuery = function ( query ) {
@@ -240,10 +252,10 @@ var route = function ( method, key, query, body, res ) {
             handleDel ( key, patchQuery ( query ), res );
             break;
         case 'search':
-            handelSearch ( patchQuery ( query ), res );
+            handleSearch ( patchQuery ( query ), res );
             break;
         case 'count':
-            handelCount ( patchQuery ( query ), res );
+            handleCount ( key, patchQuery ( query ), res );
             break;
         default:
             sendResponse ( res, 405, 'HTTP method "' + method + '" not supported' );
