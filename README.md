@@ -147,8 +147,8 @@ GET http://**host**:**port**/**key**&before=**before_timestamp**&after=**after_t
 ####Parameters
 
 - *specific_timestamp* (optional): Retrieve a historical key value stored at the specified time
-- *before_timestamp* (optional): Retrieve a list of stored key value URI's (with *specific_timestamp* specified), stored before the specified time. (Can be used in conjunction with *after_timestamp*)
-- *after_timestamp* (optional): Retrieve a list of stored key value URI's (with *specific_timestamp* specified), stored after the specified time.  (Can be used in conjunction with *before_timestamp*)
+- *before_timestamp* (optional): Retrieve a list of stored key value URI's (with *specific_timestamp* specified), stored before the specified time. (Can be used in conjunction with *after_timestamp*). *The values plus_inf and minus_inf could be used, and means **latest time ever** and **earliest time ever** respectively*
+- *after_timestamp* (optional): Retrieve a list of stored key value URI's (with *specific_timestamp* specified), stored after the specified time.  (Can be used in conjunction with *before_timestamp*). *The values plus_inf and minus_inf could be used, and means **latest time ever** and **earliest time ever** respectively*
 - *count* (optional): Specify how many results to return. This parameter works with all the other parameters. Pagination is achieved by specifying *count*, and using the last, or first url timestamp (depending on your direction of travel) as the *before_timestamp* or *after_timestamp* of the next query, with the same *count* parameter.
 
 
@@ -165,4 +165,4 @@ DELETE http://host:port/key?before=**before_timestamp**
 
 ####Parameters
 
-- *before_timestamp* (mandatory): Delete all values stored before the specified time.
+- *before_timestamp* (mandatory): Delete all values stored before the specified time. *The values plus_inf can be used, and means **latest time ever** (ie it deletes everything)

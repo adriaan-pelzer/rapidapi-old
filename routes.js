@@ -3,7 +3,7 @@ var Redis = require ( 'redis' );
 var redis;
 var globalConf;
 
-var debug = true;
+var debug = false;
 
 var log = function ( message ) {
     if ( debug ) {
@@ -214,19 +214,36 @@ var handelSearch = function ( query, res ) {
     }
 };
 
+var patchQuery = function ( query ) {
+    var returnQuery = _.clone ( query );
+
+    _.each ( [ 'before', 'after' ], function ( item ) {
+        _.each ( { 'plus_inf': '+inf', 'minus_inf': '-inf' }, function ( replacement, term ) {
+            if ( ! _.isUndefined ( returnQuery[item] ) && ( returnQuery[item] === term ) ) {
+                returnQuery[item] = replacement;
+            }
+        } );
+    } );
+
+    return returnQuery;
+};
+
 var route = function ( method, key, query, body, res ) {
     switch ( method ) {
         case 'get':
-            handleGet ( key, query, res );
+            handleGet ( key, patchQuery ( query ), res );
             break;
         case 'post':
-            handlePost ( key, query, body, res );
+            handlePost ( key, patchQuery ( query ), body, res );
             break;
         case 'delete':
-            handleDel ( key, query, res );
+            handleDel ( key, patchQuery ( query ), res );
             break;
         case 'search':
-            handelSearch ( query, res );
+            handelSearch ( patchQuery ( query ), res );
+            break;
+        case 'count':
+            handelCount ( patchQuery ( query ), res );
             break;
         default:
             sendResponse ( res, 405, 'HTTP method "' + method + '" not supported' );
