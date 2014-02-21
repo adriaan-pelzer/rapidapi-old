@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var spawn = require('child_process').spawn, redisServer = spawn ( 'redis-server' );
+//var spawn = require('child_process').spawn, redisServer = spawn ( 'redis-server' );
 var express = require ( 'express' );
 var app = express ();
 var routes = require ( __dirname + '/routes.js' );
